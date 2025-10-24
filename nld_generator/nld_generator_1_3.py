@@ -42,7 +42,7 @@ def run_nld_generation():
 
     prompt_template_correcao = """"Your task is to correct and format the following technical term according to strict geological and petroleum domain standards. Follow these rules precisely:
     
-    1. If the term is a concatenated phrase, separate the words (e.g., "carbonatemounds" -> "carbonate mounds").
+    1. If the term is concatenated words, separate the words (e.g., "carbonatemounds" -> "carbonate mounds").
     2. If the term contains an obvious typo, correct it.
     3. If the term is already correct and well-formatted, return it unchanged.
     4. If the term is nonsensical or unrecognizable return the exact string "UNKNOWN_TERM".
@@ -91,7 +91,7 @@ def run_nld_generation():
                 termo_corrigido = response_correcao.text.strip()
 
                 if termo_corrigido == "UNKNOWN_TERM":
-                    motivo = 'Not recognized by LLM' if termo_corrigido == "UNKNOWN_TERM" else 'Invalid response from correction LLM'
+                    motivo = 'Not recognized by LLM'
                     print(f"  -> Term '{termo_bruto}' invalid. Marked for manual review. Reason: {motivo}")
                     termos_para_revisao.append({'Term_Original': termo_bruto, 'Label': rotulo_ner, 'Reason': motivo, 'LLM_Response': termo_corrigido}) # Use English keys
                     time.sleep(1)

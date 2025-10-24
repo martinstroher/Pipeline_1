@@ -3,16 +3,21 @@ import google.generativeai as genai
 import os
 import time
 
+### 1. API AND MODEL CONFIGURATION ###
+
 try:
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-    print("API Key do Gemini configurada com sucesso a partir das variáveis de ambiente.")
+    # Translated log
+    print("Gemini API Key configured successfully from environment variables.")
 except KeyError:
-    print("ERRO: A variável de ambiente GEMINI_API_KEY não foi encontrada.")
-    print("Por favor, configure-a ou insira a chave diretamente no script na variável API_KEY.")
+    # Translated log
+    print("ERROR: The GEMINI_API_KEY environment variable was not found.")
+    # Translated log
+    print("Please set it or insert the key directly into the script in the API_KEY variable.")
     exit()
 
 MODEL_NAME = os.environ["LLM_MODEL_NAME"]
-MODEL_TEMPERATURE=float(os.environ.get("LLM_MODEL_TEMPERATURE", 0))
+MODEL_TEMPERATURE = float(os.environ.get("LLM_MODEL_TEMPERATURE", 0.0)) # Use float default
 
 INPUT_FILE = os.environ["CONSOLIDATED_NER_RESULTS"]
 OUTPUT_FILE = os.environ["CONSOLIDATED_NER_RESULTS_WITH_NLDS"]
@@ -23,16 +28,20 @@ generation_config = genai.GenerationConfig(
 )
 
 def load_terms_and_labels_from_csv(filepath):
-    """Carrega os termos e seus rótulos de um arquivo CSV."""
+    # Translated docstring
+    """Loads terms and their labels from a CSV file."""
     if not os.path.exists(filepath):
-        print(f"ERRO: O arquivo '{filepath}' não foi encontrado.")
+        # Translated log
+        print(f"ERROR: The file '{filepath}' was not found.")
         return None
     try:
         df = pd.read_csv(filepath, encoding='utf-8', delimiter=',', header=0, usecols=['Readable_Term', 'Label'])
-        print(f"Sucesso! {len(df)} termos e rótulos carregados de '{filepath}'.")
+        # Translated log
+        print(f"Success! {len(df)} terms and labels loaded from '{filepath}'.")
         return df
     except Exception as e:
-        print(f"ERRO ao ler o arquivo CSV: {e}")
+        # Translated log
+        print(f"ERROR reading the CSV file: {e}")
         return None
 
 
@@ -80,7 +89,8 @@ if df_termos is not None:
         termo_bruto = row['Readable_Term']
         rotulo_ner = row['Label']
 
-        print(f"Processando termo {index + 1}/{total_termos}: '{termo_bruto}'...")
+        # Translated log
+        print(f"Processing term {index + 1}/{total_termos}: '{termo_bruto}'...")
 
         try:
             response_correcao = model_correcao.generate_content(
@@ -88,9 +98,11 @@ if df_termos is not None:
             termo_corrigido = response_correcao.text.strip()
 
             if termo_corrigido == "UNKNOWN_TERM" or len(termo_corrigido.split()) > 5:
-                motivo = 'Não reconhecido pelo LLM' if termo_corrigido == "UNKNOWN_TERM" else 'Resposta inválida do LLM de correção'
-                print(f"  -> Termo '{termo_bruto}' inválido. Marcado para revisão manual. Motivo: {motivo}")
-                termos_para_revisao.append({'Termo_Original': termo_bruto, 'Label': rotulo_ner, 'Motivo': motivo, 'Resposta_LLM': termo_corrigido})
+                # Translated reason strings
+                motivo = 'Not recognized by LLM' if termo_corrigido == "UNKNOWN_TERM" else 'Invalid response from correction LLM'
+                # Translated log
+                print(f"  -> Term '{termo_bruto}' invalid. Marked for manual review. Reason: {motivo}")
+                termos_para_revisao.append({'Term_Original': termo_bruto, 'Label': rotulo_ner, 'Reason': motivo, 'LLM_Response': termo_corrigido}) # Use English keys
                 time.sleep(1)
                 continue
 
@@ -98,28 +110,45 @@ if df_termos is not None:
                 prompt_template_definicao.format(termo_corrigido=termo_corrigido, rotulo_ner=rotulo_ner))
             nld_gerada = response_definicao.text.strip()
 
-            if "não tenho informações" in nld_gerada.lower() or "termo desconhecido" in nld_gerada.lower() or len(
-                    nld_gerada) == 0:
-                print(f"  -> Definição para '{termo_corrigido}' não encontrada. Marcado para revisão manual.")
-                termos_para_revisao.append({'Termo_Original': termo_bruto, 'Termo_Corrigido': termo_corrigido, 'Label': rotulo_ner, 'Motivo': 'Sem definição encontrada'})
+            # --- Failure Management (using robust structural check) ---
+            termo_corrigido_lower = termo_corrigido.lower()
+            nld_lower = nld_gerada.lower()
+
+            # A definition is considered INVALID if:
+            # 1. It's too short (e.g., less than 25 characters).
+            # 2. It doesn't contain the term being defined.
+            # 3. It doesn't contain the "is a" structure (English).
+            is_invalid = (len(nld_gerada) < 25 or
+                          termo_corrigido_lower not in nld_lower or
+                          ' is a ' not in nld_lower)
+
+            if is_invalid:
+                # Translated log
+                print(f"  -> Definition for '{termo_corrigido}' is invalid or poorly formatted. Marked for manual review.")
+                termos_para_revisao.append({'Term_Original': termo_bruto, 'Term_Corrected': termo_corrigido, 'Label': rotulo_ner, 'Reason': 'Poorly formatted NLD', 'Generated_NLD': nld_gerada}) # Use English keys
             else:
-                print(f"  -> Definição gerada com sucesso.")
+                # Translated log
+                print(f"  -> Definition generated successfully.")
                 resultados.append(
-                    {'Termo_Corrigido': termo_corrigido, 'NLD': nld_gerada, 'Rótulo_Original': rotulo_ner})
+                    {'Corrected_Term': termo_corrigido, 'NLD': nld_gerada, 'Original_Label': rotulo_ner}) # Use English keys
 
             time.sleep(1)
 
         except Exception as e:
-            print(f"  -> ERRO ao processar o termo '{termo_bruto}': {e}")
-            termos_para_revisao.append({'Termo_Original': termo_bruto, 'Label': rotulo_ner, 'Erro': str(e)})
+            # Translated log
+            print(f"  -> ERROR processing term '{termo_bruto}': {e}")
+            termos_para_revisao.append({'Term_Original': termo_bruto, 'Label': rotulo_ner, 'Error': str(e)}) # Use English keys
 
-    print("\nProcessamento concluído. Salvando resultados...")
+    # Translated log
+    print("\nProcessing complete. Saving results...")
 
     df_resultados = pd.DataFrame(resultados)
     df_resultados.to_csv(OUTPUT_FILE, index=False, encoding='utf-8-sig')
-    print(f"{len(df_resultados)} definições salvas em 'nlds_generated.csv'")
+    # Translated log (using variable for filename)
+    print(f"{len(df_resultados)} definitions saved to '{OUTPUT_FILE}'")
 
     if termos_para_revisao:
         df_revisao = pd.DataFrame(termos_para_revisao)
         df_revisao.to_csv(OUTPUT_FAILURE_FILE, index=False, encoding='utf-8-sig')
-        print(f"{len(df_revisao)} termos para revisão manual salvos em 'termos_para_revisao_manual.csv'")
+        # Translated log (using variable for filename)
+        print(f"{len(df_revisao)} terms marked for manual review saved to '{OUTPUT_FAILURE_FILE}'")

@@ -13,6 +13,7 @@ except Exception as e:
 
 BATCH_SIZE = int(os.environ.get("BATCH_SIZE", 10))
 MODEL_NAME = os.environ["LLM_MODEL_NAME"]
+MODEL_TEMPERATURE=os.environ.get("LLM_MODEL_TEMPERATURE", 0)
 INPUT_FILE_PATH = os.environ["CONSOLIDATED_NER_RESULTS_WITH_NLDS"]
 OUTPUT_FILE_PATH = os.environ["CATEGORIZED_NER_TERMS"]
 GEORESERVOIR_DEFS_PATH = os.environ["GEORESERVOIR_DEFS_PATH"]
@@ -22,7 +23,7 @@ BFO_DEFS_PATH = os.environ["BFO_DEFS_PATH"]
 print(f"Processing in batches of {BATCH_SIZE} terms.")
 
 generation_config = genai.GenerationConfig(
-    temperature=0.0,
+    temperature=MODEL_TEMPERATURE,
     response_mime_type="application/json"
 )
 

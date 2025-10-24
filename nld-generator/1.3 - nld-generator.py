@@ -12,13 +12,14 @@ except KeyError:
     exit()
 
 MODEL_NAME = os.environ["LLM_MODEL_NAME"]
+MODEL_TEMPERATURE=os.environ.get("LLM_MODEL_TEMPERATURE", 0)
 
 INPUT_FILE = os.environ["CONSOLIDATED_NER_RESULTS"]
 OUTPUT_FILE = os.environ["CONSOLIDATED_NER_RESULTS_WITH_NLDS"]
 OUTPUT_FAILURE_FILE = os.environ["UNKNOWN_TERMS_FILE"]
 
 generation_config = genai.GenerationConfig(
-    temperature=0.0,
+    temperature=MODEL_TEMPERATURE,
 )
 
 def load_terms_and_labels_from_csv(filepath):

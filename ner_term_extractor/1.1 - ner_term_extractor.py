@@ -5,7 +5,7 @@ import torch
 from tqdm import tqdm
 
 MODEL_NAME = os.environ["NER_MODEL_NAME"]
-INPUT_FILE = os.environ.get["EXTRACTED_TEXTS"]
+INPUT_FILE = os.environ["EXTRACTED_TEXTS"]
 OUTPUT_FILE = os.environ["NER_OUTPUT_FILE"]
 
 device = 0 if torch.cuda.is_available() else -1
@@ -90,17 +90,17 @@ def save_results_to_csv(results, filename):
     if not results:
         print("No result to save.")
         return
-    fieldnames = ['Entidade', 'Rótulo', 'Contagem', 'Score Médio']
+    fieldnames = ['Entity', 'Label', 'Count', 'Average_Score']
     try:
         with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             for row in results:
                 writer.writerow({
-                    'Entidade': row['entity'],
-                    'Rótulo': row['label'],
-                    'Contagem': row['count'],
-                    'Score Médio': f"{row['avg_score']:.4f}".replace('.', ',')
+                    'Entity': row['entity'],
+                    'Label': row['label'],
+                    'Count': row['count'],
+                    'Average_Score': f"{row['avg_score']:.4f}".replace('.', ',')
                 })
         print(f"\nResults succesfully save in file: '{filename}'")
     except Exception as e:

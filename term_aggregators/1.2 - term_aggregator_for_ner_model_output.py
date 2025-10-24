@@ -13,8 +13,7 @@ def load_terms_and_labels_from_csv(filepath):
         print(f"ERROR: The file '{filepath}' was not found.")
         return None
     try:
-        # <-- MUDANÇA 2: Ler as colunas do arquivo de entrada: 'Entidade' e 'Rótulo'
-        df = pd.read_csv(filepath, encoding='utf-8', delimiter=',', header=0, usecols=['Entidade', 'Rótulo'])
+        df = pd.read_csv(filepath, encoding='utf-8', delimiter=',', header=0, usecols=['Entity', 'Label'])
         print(f"Success! {len(df)} terms and labels loaded from '{filepath}'.")
         return df
     except Exception as e:
@@ -31,8 +30,8 @@ if terms_df is not None:
 
     print("Starting normalization, stemming, and mapping...")
     for index, row in terms_df.iterrows():
-        original_term = row['Entidade']
-        label = row['Rótulo']
+        original_term = row['Entity']
+        label = row['Label']
 
         if not isinstance(original_term, str) or not isinstance(label, str):
             continue

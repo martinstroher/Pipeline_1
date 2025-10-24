@@ -2,7 +2,7 @@ import pandas as pd
 import google.generativeai as genai
 import os
 import time
-import json  # Usaremos a biblioteca JSON
+import json
 
 try:
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
@@ -13,7 +13,7 @@ except Exception as e:
 
 BATCH_SIZE = int(os.environ.get("BATCH_SIZE", 10))
 MODEL_NAME = os.environ["LLM_MODEL_NAME"]
-MODEL_TEMPERATURE=os.environ.get("LLM_MODEL_TEMPERATURE", 0)
+MODEL_TEMPERATURE=float(os.environ.get("LLM_MODEL_TEMPERATURE", 0))
 INPUT_FILE_PATH = os.environ["CONSOLIDATED_NER_RESULTS_WITH_NLDS"]
 OUTPUT_FILE_PATH = os.environ["CATEGORIZED_NER_TERMS"]
 GEORESERVOIR_DEFS_PATH = os.environ["GEORESERVOIR_DEFS_PATH"]
@@ -29,7 +29,6 @@ generation_config = genai.GenerationConfig(
 
 
 def load_definitions_from_file(filepath):
-    """Loads text content from a specified file."""
     if not os.path.exists(filepath):
         print(f"ERROR: Definition file not found at '{filepath}'")
         return None
@@ -49,7 +48,6 @@ if not geocore_definitions or not bfo_definitions:
 
 
 def load_nlds_from_csv(filepath):
-    """Loads terms, NLDs, and labels from a CSV file."""
     if not os.path.exists(filepath):
         print(f"ERROR: The file '{filepath}' was not found.")
         return None

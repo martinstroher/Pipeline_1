@@ -1,4 +1,4 @@
-Entidade,Rótulo,Contagem,Score Médio
+Entity,Label,Count,Average_Score
 calcite,MINERAIS,557,"0,8503"
 grainstones,ROCHA,299,"0,9578"
 carbonates,ROCHA,263,"0,7661"

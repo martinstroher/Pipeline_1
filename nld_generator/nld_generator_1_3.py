@@ -104,23 +104,10 @@ def run_nld_generation():
                 termo_corrigido_lower = termo_corrigido.lower()
                 nld_lower = nld_gerada.lower()
 
-                # A definition is considered INVALID if:
-                # 1. It's too short (e.g., less than 25 characters).
-                # 2. It doesn't contain the term being defined.
-                # 3. It doesn't contain the "is a" structure (English).
-                is_invalid = (len(nld_gerada) < 25 or
-                              termo_corrigido_lower not in nld_lower or
-                              ' is a ' not in nld_lower)
-
-                if is_invalid:
-                    # Translated log
-                    print(f"  -> Definition for '{termo_corrigido}' is invalid or poorly formatted. Marked for manual review.")
-                    termos_para_revisao.append({'Term_Original': termo_bruto, 'Term_Corrected': termo_corrigido, 'Label': rotulo_ner, 'Reason': 'Poorly formatted NLD', 'Generated_NLD': nld_gerada}) # Use English keys
-                else:
-                    # Translated log
-                    print(f"  -> Definition generated successfully.")
-                    resultados.append(
-                        {'Corrected_Term': termo_corrigido, 'NLD': nld_gerada, 'Original_Label': rotulo_ner}) # Use English keys
+                # Translated log
+                print(f"  -> Definition generated successfully.")
+                resultados.append(
+                    {'Corrected_Term': termo_corrigido, 'NLD': nld_gerada, 'Original_Label': rotulo_ner}) # Use English keys
 
                 time.sleep(1)
 

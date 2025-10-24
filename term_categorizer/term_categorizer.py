@@ -12,7 +12,7 @@ def run_term_categorization():
         print(f"ERROR configuring Gemini API: {e}")
         exit()
 
-    BATCH_SIZE = int(os.environ.get("BATCH_SIZE", 10))
+    BATCH_SIZE = int(os.environ.get("BATCH_SIZE", 1))
     MODEL_NAME = os.environ["LLM_MODEL_NAME"]
     MODEL_TEMPERATURE=float(os.environ.get("LLM_MODEL_TEMPERATURE", 0))
     INPUT_FILE_PATH = os.environ["CONSOLIDATED_NER_RESULTS_WITH_NLDS"]

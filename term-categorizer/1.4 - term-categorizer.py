@@ -13,7 +13,7 @@ except Exception as e:
 
 BATCH_SIZE = int(os.environ.get("BATCH_SIZE", 10))
 MODEL_NAME = os.environ["LLM_MODEL_NAME"]
-MODEL_TEMPERATURE=os.environ.get("LLM_MODEL_TEMPERATURE", 0)
+MODEL_TEMPERATURE=float(os.environ.get("LLM_MODEL_TEMPERATURE", 0))
 INPUT_FILE_PATH = os.environ["CONSOLIDATED_NER_RESULTS_WITH_NLDS"]
 OUTPUT_FILE_PATH = os.environ["CATEGORIZED_NER_TERMS"]
 GEORESERVOIR_DEFS_PATH = os.environ["GEORESERVOIR_DEFS_PATH"]
@@ -53,7 +53,8 @@ def load_nlds_from_csv(filepath):
         return None
     try:
         df = pd.read_csv(filepath, encoding='utf-8', delimiter=',', header=0,
-                         usecols=['Termo_Corrigido', 'NLD', 'Rótulo_Original'])
+                         usecols=['Corrected_Term', 'NLD', 'Original_Label'])
+
         print(f"Success! {len(df)} terms, NLDs, and labels loaded from '{filepath}'.")
         return df
     except Exception as e:
@@ -107,7 +108,7 @@ if df_nlds is not None:
         batch_list = []
         for index, row in batch_df.iterrows():
             batch_list.append({
-                "term": row['Termo_Corrigido'],
+                "term": row['Corrected_Term'],
                 "nld": row['NLD']
             })
         json_batch_str = json.dumps(batch_list, indent=2)
@@ -128,9 +129,9 @@ if df_nlds is not None:
                 original_row = batch_df.iloc[idx]
 
                 classification_results.append({
-                    'Term': original_row['Termo_Corrigido'],
+                    'Term': original_row['Corrected_Term'],
                     'Category': result_item['category'],
-                    'Original_Label': original_row['Rótulo_Original'],
+                    'Original_Label': original_row['Original_Label'],
                     'Reasoning': result_item['reasoning'],
                     'NLD': original_row['NLD']
                 })

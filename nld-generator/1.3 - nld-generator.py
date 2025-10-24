@@ -7,40 +7,33 @@ import time
 
 try:
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-    # Translated log
     print("Gemini API Key configured successfully from environment variables.")
 except KeyError:
-    # Translated log
     print("ERROR: The GEMINI_API_KEY environment variable was not found.")
-    # Translated log
     print("Please set it or insert the key directly into the script in the API_KEY variable.")
     exit()
 
 MODEL_NAME = os.environ["LLM_MODEL_NAME"]
-MODEL_TEMPERATURE = float(os.environ.get("LLM_MODEL_TEMPERATURE", 0.0)) # Use float default
+MODEL_TEMPERATURE = float(os.environ.get("LLM_MODEL_TEMPERATURE", 0.0))
 
 INPUT_FILE = os.environ["CONSOLIDATED_NER_RESULTS"]
 OUTPUT_FILE = os.environ["CONSOLIDATED_NER_RESULTS_WITH_NLDS"]
-OUTPUT_FAILURE_FILE = os.environ["UNKNOWN_TERMS_FILE"]
+OUTPUT_FAILURE_FILE = os.environ["OUTPUT_FAILURE_FILE"]
 
 generation_config = genai.GenerationConfig(
     temperature=MODEL_TEMPERATURE,
 )
 
 def load_terms_and_labels_from_csv(filepath):
-    # Translated docstring
     """Loads terms and their labels from a CSV file."""
     if not os.path.exists(filepath):
-        # Translated log
         print(f"ERROR: The file '{filepath}' was not found.")
         return None
     try:
         df = pd.read_csv(filepath, encoding='utf-8', delimiter=',', header=0, usecols=['Readable_Term', 'Label'])
-        # Translated log
         print(f"Success! {len(df)} terms and labels loaded from '{filepath}'.")
         return df
     except Exception as e:
-        # Translated log
         print(f"ERROR reading the CSV file: {e}")
         return None
 
@@ -97,10 +90,8 @@ if df_termos is not None:
                 prompt_template_correcao.format(termo_bruto=termo_bruto))
             termo_corrigido = response_correcao.text.strip()
 
-            if termo_corrigido == "UNKNOWN_TERM" or len(termo_corrigido.split()) > 5:
-                # Translated reason strings
+            if termo_corrigido == "UNKNOWN_TERM":
                 motivo = 'Not recognized by LLM' if termo_corrigido == "UNKNOWN_TERM" else 'Invalid response from correction LLM'
-                # Translated log
                 print(f"  -> Term '{termo_bruto}' invalid. Marked for manual review. Reason: {motivo}")
                 termos_para_revisao.append({'Term_Original': termo_bruto, 'Label': rotulo_ner, 'Reason': motivo, 'LLM_Response': termo_corrigido}) # Use English keys
                 time.sleep(1)
@@ -110,7 +101,6 @@ if df_termos is not None:
                 prompt_template_definicao.format(termo_corrigido=termo_corrigido, rotulo_ner=rotulo_ner))
             nld_gerada = response_definicao.text.strip()
 
-            # --- Failure Management (using robust structural check) ---
             termo_corrigido_lower = termo_corrigido.lower()
             nld_lower = nld_gerada.lower()
 

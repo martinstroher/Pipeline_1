@@ -1,9 +1,10 @@
-import pandas as pd
-import google.generativeai as genai
 import os
 import time
 
-### 1. API AND MODEL CONFIGURATION ###
+import google.generativeai as genai
+import pandas as pd
+
+
 def run_nld_generation():
     try:
         genai.configure(api_key=os.environ["GEMINI_API_KEY"])
@@ -101,10 +102,6 @@ def run_nld_generation():
                     prompt_template_definicao.format(termo_corrigido=termo_corrigido, rotulo_ner=rotulo_ner))
                 nld_gerada = response_definicao.text.strip()
 
-                termo_corrigido_lower = termo_corrigido.lower()
-                nld_lower = nld_gerada.lower()
-
-                # Translated log
                 print(f"  -> Definition generated successfully.")
                 resultados.append(
                     {'Corrected_Term': termo_corrigido, 'NLD': nld_gerada, 'Original_Label': rotulo_ner}) # Use English keys
@@ -116,16 +113,13 @@ def run_nld_generation():
                 print(f"  -> ERROR processing term '{termo_bruto}': {e}")
                 termos_para_revisao.append({'Term_Original': termo_bruto, 'Label': rotulo_ner, 'Error': str(e)}) # Use English keys
 
-        # Translated log
         print("\nProcessing complete. Saving results...")
 
         df_resultados = pd.DataFrame(resultados)
         df_resultados.to_csv(OUTPUT_FILE, index=False, encoding='utf-8-sig')
-        # Translated log (using variable for filename)
         print(f"{len(df_resultados)} definitions saved to '{OUTPUT_FILE}'")
 
         if termos_para_revisao:
             df_revisao = pd.DataFrame(termos_para_revisao)
             df_revisao.to_csv(OUTPUT_FAILURE_FILE, index=False, encoding='utf-8-sig')
-            # Translated log (using variable for filename)
             print(f"{len(df_revisao)} terms marked for manual review saved to '{OUTPUT_FAILURE_FILE}'")

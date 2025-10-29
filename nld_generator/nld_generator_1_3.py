@@ -41,9 +41,9 @@ def run_nld_generation():
 
     system_instruction_correcao = "You are a data processing assistant specializing in correcting and standardizing technical terms from the geology domain."
 
-    prompt_template_correcao = """"Your task is to correct and format the following technical term according to strict geological and petroleum domain standards. Follow these rules precisely:
+    prompt_template_correcao = """"Your task is to correct and format the following technical term according to strict geological and petroleum domain standards. The term may be in Portuguese or English. Follow these rules precisely:
     
-    1. If the term is concatenated words, separate the words (e.g., "carbonatemounds" -> "carbonate mounds").
+    1. If the term is concatenated words, separate the words (e.g., "carbonatemounds" -> "carbonate mounds"; "rochacarbonática" -> "rocha carbonática").
     2. If the term contains an obvious typo, correct it.
     3. If the term is already correct and well-formatted, return it unchanged.
     4. If the term is nonsensical or unrecognizable return the exact string "UNKNOWN_TERM".
@@ -55,10 +55,10 @@ def run_nld_generation():
     """
 
     system_instruction_definicao = "You are a senior geoscientist and ontology engineer. Your expertise is in oil and gas exploration geology, with a specific focus on the carbonate reservoirs of the Brazilian Pre-Salt."
-    prompt_template_definicao = """Generate a concise and precise Natural Language Definition (NLD) for the provided term, using the assigned label as context for disambiguation.
+    prompt_template_definicao = """Generate a concise and precise Natural Language Definition (NLD) in Portuguese for the provided term, using the assigned label as context for disambiguation. The term may be in Portuguese or English.
     
     Mandatory Instructions:
-    1. The definition must strictly follow the Aristotelian structure "X is a Y that Z". For example, "An amount of rock is a solid consolidated earth material that is constituted by an aggregate of particles made of mineral matter or material of biological origin"
+    1. The definition must strictly follow the Aristotelian structure "X is a Y that Z". For example, "An amount of rock is a solid consolidated earth material that is constituted by an aggregate of particles made of mineral matter or material of biological origin".
     2. **Contextual Disambiguation:** You should use the `Label` to resolve any ambiguity in the term. For example, if the `Term to be defined` is "Paraná" and the assigned `Label` is "BACIA", you must define the Paraná Basin, not the river or the state.
     3. The definition should be technical yet clear, and a maximum of three sentences.
     4. Your response must contain only the generated NLD, without any extra text.

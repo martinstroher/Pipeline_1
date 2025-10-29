@@ -38,15 +38,15 @@ def run_nld_generation():
             print(f"ERROR reading the CSV file: {e}")
             return None
 
+    system_instruction_correcao = "You are a geological terminologist and data validation specialist. Your task is to correct and standardize technical terms from the petroleum geology domain with high accuracy."
 
-    system_instruction_correcao = "You are a data processing assistant specializing in correcting and standardizing technical terms from the geology domain."
-
-    prompt_template_correcao = """"Your task is to correct and format the following technical term according to strict geological and petroleum domain standards. The term may be in Portuguese or English. Follow these rules precisely:
+    prompt_template_correcao = """"Your task is to correct and format the following technical term according to strict geological and petroleum domain standards. Follow these rules precisely:
     
-    1. If the term is concatenated words, separate the words (e.g., "carbonatemounds" -> "carbonate mounds"; "rochacarbonática" -> "rocha carbonática").
+    1. If the term is concatenated words, separate the words (e.g., "carbonatemounds" -> "carbonate mounds").
     2. If the term contains an obvious typo, correct it.
     3. If the term is already correct and well-formatted, return it unchanged.
     4. If the term is nonsensical or unrecognizable return the exact string "UNKNOWN_TERM".
+    5. If the term is in any other language, you MUST translate it to its most appropriate **English equivalent**.
     
     Your response must contain ONLY the corrected term or the "UNKNOWN_TERM" flag.
     
@@ -55,13 +55,14 @@ def run_nld_generation():
     """
 
     system_instruction_definicao = "You are a senior geoscientist and ontology engineer. Your expertise is in oil and gas exploration geology, with a specific focus on the carbonate reservoirs of the Brazilian Pre-Salt."
-    prompt_template_definicao = """Generate a concise and precise Natural Language Definition (NLD) in Portuguese for the provided term, using the assigned label as context for disambiguation. The term may be in Portuguese or English.
+    prompt_template_definicao = """Generate a concise and precise Natural Language Definition (NLD) for the provided term, using the assigned label as context for disambiguation.
     
     Mandatory Instructions:
     1. The definition must strictly follow the Aristotelian structure "X is a Y that Z". For example, "An amount of rock is a solid consolidated earth material that is constituted by an aggregate of particles made of mineral matter or material of biological origin".
-    2. **Contextual Disambiguation:** You should use the `Label` to resolve any ambiguity in the term. For example, if the `Term to be defined` is "Paraná" and the assigned `Label` is "BACIA", you must define the Paraná Basin, not the river or the state.
-    3. The definition should be technical yet clear, and a maximum of three sentences.
-    4. Your response must contain only the generated NLD, without any extra text.
+    2. Base the definition on your knowledge of Brazilian Pre-Salt geology and petroleum systems.
+    3. You should use the `Label` to resolve any ambiguity in the term. For example, if the `Term to be defined` is "Paraná" and the assigned `Label` is "BACIA", you must define the Paraná Basin, not the river or the state.
+    4. The definition should be technical yet clear, and a maximum of three sentences.
+    5. Your response must contain only the generated NLD, without any extra text.
     
     Term to be defined: "{termo_corrigido}"
     Assigned Label: "{rotulo_ner}"
@@ -83,7 +84,6 @@ def run_nld_generation():
             termo_bruto = row['Readable_Term']
             rotulo_ner = row['Label']
 
-            # Translated log
             print(f"Processing term {index + 1}/{total_termos}: '{termo_bruto}'...")
 
             try:
@@ -104,14 +104,14 @@ def run_nld_generation():
 
                 print(f"  -> Definition generated successfully.")
                 resultados.append(
-                    {'Corrected_Term': termo_corrigido, 'NLD': nld_gerada, 'Original_Label': rotulo_ner}) # Use English keys
+                    {'Corrected_Term': termo_corrigido, 'NLD': nld_gerada, 'Original_Label': rotulo_ner})
 
                 time.sleep(1)
 
             except Exception as e:
                 # Translated log
                 print(f"  -> ERROR processing term '{termo_bruto}': {e}")
-                termos_para_revisao.append({'Term_Original': termo_bruto, 'Label': rotulo_ner, 'Error': str(e)}) # Use English keys
+                termos_para_revisao.append({'Term_Original': termo_bruto, 'Label': rotulo_ner, 'Error': str(e)})
 
         print("\nProcessing complete. Saving results...")
 

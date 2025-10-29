@@ -2,7 +2,7 @@ import pandas as pd
 from collections import Counter
 import nltk
 import os
-from nltk.stem import RSLPStemmer
+from nltk.stem import SnowballStemmer
 
 def run_term_aggregation():
     INPUT_FILE = os.environ["NER_OUTPUT_FILE"]
@@ -21,7 +21,7 @@ def run_term_aggregation():
             print(f"ERROR reading the CSV file: {e}")
             return None
 
-    pt_stemmer = RSLPStemmer()
+    en_stemmer = SnowballStemmer("english")
 
     terms_df = load_terms_and_labels_from_csv(INPUT_FILE)
 
@@ -41,7 +41,7 @@ def run_term_aggregation():
             clean_label = label.strip()
 
             words = clean_original_term.split()
-            stemmed_words = [pt_stemmer.stem(p) for p in words]
+            stemmed_words = [en_stemmer.stem(p) for p in words]
             final_stem = " ".join(stemmed_words)
 
             stemmed_terms.append(final_stem)
